@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP21110010707</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f0f2f5;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: left;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .filter-group {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    .filter-group label {
+      font-size: 14px;
+      color: #555;
+      margin-right: 10px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .response {
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BFHL Fullstack Challenge</h1>
+
+    <div class="form-group">
+      <label for="jsonInput">API Input</label>
+      <!-- Textarea to enter JSON data -->
+      <textarea id="jsonInput" placeholder='Enter JSON (e.g., { "data": ["A", "1", "b", "5", "c"] })'></textarea>
+    </div>
+
+    <!-- Submit button -->
+    <button onclick="handleSubmit()">Submit</button>
+
+    <!-- Filters -->
+    <div class="filter-group">
+      <label for="filter">Multi Filter</label>
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" name="filter" value="numbers" onchange="autoSubmit()"> Numbers
+        </label>
+        <label>
+          <input type="checkbox" name="filter" value="alphabets" onchange="autoSubmit()"> Alphabets
+        </label>
+        <label>
+          <input type="checkbox" name="filter" value="highestAlpha" onchange="autoSubmit()"> Highest Lowercase Alphabet
+        </label>
+      </div>
+    </div>
+
+    <!-- Filtered Response -->
+    <div id="response" class="response">Filtered Response:</div>
+
+    <!-- Error message -->
+    <p id="error" class="error"></p>
+
+  </div>
+
+  <script>
+    async function handleSubmit() {
+      const jsonInput = document.getElementById('jsonInput').value;
+      const errorElement = document.getElementById('error');
+      const responseElement = document.getElementById('response');
+
+      // Reset error and response
+      errorElement.textContent = '';
+      responseElement.textContent = 'Filtered Response:';
+
+      // Validate JSON input
+      let data;
+      try {
+        data = JSON.parse(jsonInput); // Validate the input as JSON
+      } catch (err) {
+        errorElement.textContent = 'Invalid JSON format.';
+        return;
+      }
+
+      try {
+        // Make the actual API call to the back-end
+        const response = await fetch('http://localhost:3000/bfhl', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch data from the server');
+        }
+
+        const jsonResponse = await response.json();
+        displayResponse(jsonResponse);
+      } catch (error) {
+        errorElement.textContent = 'Error: ' + error.message;
+      }
+    }
+
+    function autoSubmit() {
+      handleSubmit(); // Automatically submit when a checkbox is changed
+    }
+
+    function displayResponse(response) {
+      const checkboxes = document.querySelectorAll('input[name="filter"]:checked');
+      const responseElement = document.getElementById('response');
+      
+      let lines = [];
+      checkboxes.forEach(checkbox => {
+        if (checkbox.value === 'numbers') {
+          lines.push('Numbers: ' + response.numbers.join(', '));
+        } else if (checkbox.value === 'alphabets') {
+          lines.push('Alphabets: ' + response.alphabets.join(', '));
+        } else if (checkbox.value === 'highestAlpha') {
+          lines.push('Highest Lowercase Alphabet: ' + response.highest_lowercase_alphabet.join(', '));
+        }
+      });
+
+      // Display the filtered response in line-by-line format
+      responseElement.textContent = 'Filtered Response:\n' + lines.join('\n');
+    }
+  </script>
+</body>
+</html>
