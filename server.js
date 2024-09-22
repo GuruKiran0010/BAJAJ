@@ -13,11 +13,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // POST /bfhl route
 app.post('/bfhl', (req, res) => {
-    const { data, file_b64 } = req.body;
+    const { data } = req.body; // Only extracting data
+
     let numbers = [];
     let alphabets = [];
     let highestLowercaseAlphabet = null;
 
+    // Validate input
     if (!data || !Array.isArray(data)) {
         return res.status(400).json({
             is_success: false,
@@ -42,7 +44,7 @@ app.post('/bfhl', (req, res) => {
     // Send the response
     res.json({
         is_success: true,
-        user_id: "guru_kiran_14012004", // Replace with actual user ID
+        user_id: "guru_kiran_poka_14012004", // Replace with actual user ID
         email: "gurukiran_poka@srmap.edu.in",
         roll_number: "AP21110010707",
         numbers: numbers,
@@ -51,6 +53,11 @@ app.post('/bfhl', (req, res) => {
     });
 });
 
+app.get('/bfhl', (req, res) => {
+    res.status(200).json({
+        operation_code: 1
+    });
+});
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
